@@ -1,0 +1,47 @@
+{
+  "YEAR": "2025-26",
+  "SUBJECT": "Biology",
+  "CLASS": "VI",
+  "DATE": "18-11-2025",
+  "TIME": "40 Minutes",
+  "MARKS": "25",
+
+  "section_a": [
+    {
+      "number": 1,
+      "title": "Test question for subquestions formatting.",
+      "marks": null,
+      "image": null,
+      "table": null,
+
+      "parts": [
+        {
+          "label": "a",
+          "text": "This is a SHORT subquestion.",
+          "marks": "1",
+          "image": null,
+          "table": null,
+          "subparts": []
+        },
+        {
+          "label": "b",
+          "text": "This is a VERY LONG subquestion meant to test how the template handles long text that wraps across multiple lines without breaking the formatting or pushing the marks to the next line. It should stay aligned on the left while the marks remain aligned to the right.",
+          "marks": "5",
+          "image": null,
+          "table": null,
+          "subparts": []
+        },
+        {
+          "label": "c",
+          "text": "This subquestion has NO marks provided.",
+          "marks": null,
+          "image": null,
+          "table": null,
+          "subparts": []
+        }
+      ]
+    }
+  ],
+
+  "section_b": []
+}
