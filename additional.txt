@@ -1,0 +1,183 @@
+# PprBase — Additional Improvements (for later development)
+
+Ideas to make the app genuinely comfortable for a non-technical teacher (e.g.
+someone who is not used to computers) and for any user. Each item notes WHY it
+matters for that user and WHERE in the existing code it would land. Ordered
+roughly by impact for a non-technical user.
+
+Some of these overlap with Phases 2–4 already described in `master.txt`; where
+they do, the note says "elevate" — meaning: pull it earlier / treat as priority
+because it directly affects whether a non-technical person can use the app at
+all. Items marked "NEW" are not in the original plan.
+
+Legend:  [P0] do first · [P1] high value · [P2] nice to have
+
+
+================================================================================
+A. JUST GETTING IT OPEN  (a non-tech user will never use a terminal)
+================================================================================
+
+[P0] NEW — One-click launch, no terminal.
+   The app currently only starts via `./venv/bin/python main.py`. Mom will not
+   open a terminal, activate a venv, or type a path.
+   - Linux: ship a `pprbase.desktop` launcher + a `run.sh` that activates
+     the bundled venv and runs main.py. Put an icon (assets/logo.png) on it.
+   - This is a smaller, immediate version of Phase 4's PyInstaller packaging.
+     Do the launcher NOW; do the full .exe/.app bundle later.
+   - Also: a friendly message if dependencies are missing ("Please run install
+     first") instead of a Python traceback.
+
+[P1] Elevate (Phase 4) — First-run setup that creates folders and checks things
+   quietly, then shows "You're ready — choose a format to begin."
+
+
+================================================================================
+B. NEVER LOSE WORK  (the single biggest fear for a non-tech user)
+================================================================================
+
+[P0] Elevate (Phase 2) — Auto-save + resume.
+   Right now, closing the window or a crash loses everything. For a teacher who
+   spent an hour typing, this is devastating and would make them abandon the app.
+   - Auto-save PaperState to `drafts/` every ~2 min (the interval is already in
+     config/settings.json -> editor.auto_save_minutes; it's just not used yet).
+   - Implement in core/state_manager.py (PaperState already has to_json/from_json)
+     driven by a QTimer in ui/main_window.py.
+   - On launch, show recent drafts on the home screen as "Continue where you left
+     off" cards (ui/format_selector.py).
+
+[P0] NEW — Guard against closing with unsaved work.
+   ui/main_window.py: override closeEvent() to ask "You have unsaved changes —
+   save a draft before closing?" with Save / Discard / Cancel.
+
+[P1] NEW — Undo for destructive actions.
+   "Clear this question" (ui/question_form.py -> _clear_question) deletes
+   instantly. A misclick loses a question. Either:
+   - add a confirm dialog ("Clear this question? This can't be undone."), or
+   - keep a small undo stack in PaperState and add Ctrl+Z.
+
+[P2] NEW — Automatic timestamped backups of drafts, so even a bad save is
+   recoverable.
+
+
+================================================================================
+C. REASSURANCE THAT IT LOOKS RIGHT  (non-tech users distrust what they can't see)
+================================================================================
+
+[P1] NEW — True visual preview of the paper (WYSIWYG), not just the structure
+   tree. The current right panel (ui/preview_panel.py) shows Q1 ✓ / Q2 ○ — useful,
+   but a teacher wants to SEE the actual page before printing.
+   - Option A (cheap): render the generated .docx to a preview image/PDF and show
+     it in a scrollable pane. On Linux this can use LibreOffice headless; better
+     to render via a lightweight method to avoid a heavy dependency.
+   - Option B: a "Preview" button that builds to a temp file and opens it.
+   - At minimum, add a "Quick Preview" button that exports to a temp .docx and
+     opens it in their word processor.
+
+[P1] NEW — Live "marks budget" indicator.
+   The format declares total_marks (e.g. 80). As the teacher fills questions, show
+   "Allocated: 62 / 80" somewhere visible (ui/paper_editor.py or preview_panel.py),
+   turning orange/red if over/under. Catches mistakes before printing.
+   - Data is already there: sum marks across PaperState vs fmt["total_marks"].
+
+[P2] NEW — Warn on empty required questions before export ("Section B has 4 of 10
+   questions empty — generate anyway?").
+
+
+================================================================================
+D. WHAT TEACHERS ACTUALLY NEED ON THE PAGE
+================================================================================
+
+[P1] NEW — Rich text for science: subscripts / superscripts / bold.
+   A chemistry teacher needs H2O as H₂O and x^2 as x². Right now question text is
+   plain (ui/question_form.py uses a plain QTextEdit; document_engine.py writes
+   plain runs). Without this the app is frustrating for the very subject in the
+   sample format.
+   - UI: small toolbar above the text box (Bold, Subscript, Superscript) OR
+     support simple markup like H_2O / x^2 and render it in document_engine.py
+     via run.font.subscript / superscript (python-docx supports both).
+
+[P1] NEW — Answer key generation.
+   Teachers make a paper AND need the answers. The data already exists (MCQ
+   "answer" field; model answers could be added). Add a "Generate Answer Key"
+   button that produces a second .docx listing correct answers.
+   - New method in core/document_engine.py (e.g. build_answer_key()).
+
+[P1] NEW — Export to PDF as well as .docx.
+   Many teachers want a ready-to-print PDF and may not have Word. Add a "Save as
+   PDF" option next to "Generate Paper" (ui/main_window.py). Implement via
+   LibreOffice headless conversion or docx2pdf, with a clear message if the
+   converter isn't available.
+
+[P2] NEW — School logo + custom header.
+   The repo already reserves assets/logo.png. Let a format reference a logo image
+   and draw it centered in the header (core/document_engine.py._add_header).
+
+[P2] NEW — "Leave answer space" option per question (blank lines / ruled space)
+   so the printed paper has room to write — common for short/long answer papers.
+
+[P2] NEW — Reorder / insert / delete questions, and "duplicate question" to reuse
+   a similar one. Currently question count is fixed by the format.
+
+
+================================================================================
+E. ACCESSIBILITY & COMFORT
+================================================================================
+
+[P1] Elevate (Phase 4) — Font-size / zoom control in the UI.
+   config/settings.json already has editor.font_size and the stylesheet
+   (ui/styles.py) accepts it, but there's no way to change it without editing
+   JSON. Add a simple A-/A+ control in the top bar for older eyes.
+
+[P2] NEW — High-contrast / larger-target theme toggle.
+
+[P2] NEW — Tooltips in plain English on every button, and a one-time guided
+   walkthrough on first launch ("This is where you type the question…").
+
+[P2] NEW — Spell-check in the question text fields.
+
+
+================================================================================
+F. EASIER INPUT
+================================================================================
+
+[P1] NEW — Drag-and-drop and paste images.
+   The image picker (ui/image_picker.py) only opens a file dialog. Letting the
+   teacher drag an image onto the form, or paste a screenshot (Ctrl+V), is much
+   more natural than navigating folders.
+
+[P1] Elevate (Phase 2) — Format wizard (no JSON editing).
+   master.txt already plans this; it is essential for a non-tech user, because
+   "add a format" currently means hand-writing JSON. Prioritize the step-by-step
+   wizard in ui/format_selector.py so Mom can create "Class 8 Chemistry" herself,
+   including the "Duplicate this format" shortcut.
+
+[P2] NEW — Question bank / reusable snippets (a non-AI precursor to Phase 3):
+   save good questions and re-insert them across papers.
+
+
+================================================================================
+G. ROBUSTNESS / TRUST
+================================================================================
+
+[P1] Elevate (Phase 4) — Friendly error dialogs everywhere.
+   Some are done (format errors, bad images). Make sure NO action can ever show a
+   raw Python traceback. Wrap all file ops and export in try/except with a plain
+   message and a "Report a problem" hint.
+
+[P2] NEW — Remember last-used output folder and last-used format on the home
+   screen so repeat use is one click.
+
+[P2] NEW — Confirm before overwriting an existing output file with the same name.
+
+
+================================================================================
+SUGGESTED NEXT SPRINT (highest impact for a non-technical teacher)
+================================================================================
+1. One-click launcher (.desktop + run.sh)            [A, P0]
+2. Auto-save + resume + close-guard                  [B, P0]
+3. Confirm/undo on "Clear question"                  [B, P1]
+4. Marks budget indicator                            [C, P1]
+5. Rich text subscript/superscript for science       [D, P1]
+6. Answer key + PDF export                           [D, P1]
+7. Font-size control in UI                           [E, P1]
+8. Format wizard (no JSON)                            [F, P1]

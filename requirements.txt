@@ -1,0 +1,18 @@
+# PprBase dependencies
+
+# --- Phase 1: Core editor ---
+PyQt6>=6.6
+python-docx>=1.1
+Pillow>=10.0
+
+# --- Phase 3: AI question generation (RAG) ---
+# Uncomment to enable AI features.
+# chromadb>=0.4
+# sentence-transformers>=2.2
+# langchain>=0.1
+# pdfplumber>=0.10
+# pypdf>=4.0
+# anthropic>=0.25        # only if using the Claude API provider
+
+# --- Phase 4: Packaging ---
+# pyinstaller>=6.0

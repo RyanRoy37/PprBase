@@ -1,0 +1,28 @@
+[
+  {
+    "class": "VI",
+    "source": "Chemistry Ut1 VI Blueprint.docx",
+    "format": "chemistry_ut1_class_vi.json",
+    "draft_id": "chemistryut1vib86887e7",
+    "questions": 21,
+    "maximum_marks": 25,
+    "printed_choice_questions": 3,
+    "questions_to_answer": 2,
+    "docx": "chemistry_ut1_class_vi.docx",
+    "pdf": "chemistry_ut1_class_vi.pdf",
+    "pdf_pages": 4
+  },
+  {
+    "class": "VII",
+    "source": "Chemistry Ut1 VII qs paper 2024.docx",
+    "format": "chemistry_ut1_class_vii.json",
+    "draft_id": "chemistryut1vii0f490e4e",
+    "questions": 21,
+    "maximum_marks": 25,
+    "printed_choice_questions": 3,
+    "questions_to_answer": 2,
+    "docx": "chemistry_ut1_class_vii.docx",
+    "pdf": "chemistry_ut1_class_vii.pdf",
+    "pdf_pages": 5
+  }
+]

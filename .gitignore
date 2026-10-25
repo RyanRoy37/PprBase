@@ -1,0 +1,11 @@
+venv/
+.venv/
+.build-venv-windows/
+.run-venv-windows/
+build/
+dist/
+*.spec
+__pycache__/
+*.pyc
+drafts/*
+output/*

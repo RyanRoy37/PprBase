@@ -1,0 +1,44 @@
+{
+  "format_id": "class7_chemistry",
+  "display_name": "Class 7 — Chemistry",
+  "school_name": "St. Mary's School",
+  "subject": "Chemistry",
+  "class": "7",
+  "total_marks": 70,
+  "duration": "3 hours",
+  "instructions": [
+    "All questions are compulsory.",
+    "Draw neat diagrams wherever necessary.",
+    "Marks for each question are indicated against it."
+  ],
+  "sections": [
+    {
+      "id": "A",
+      "title": "Section A — Objective Questions",
+      "description": "Choose the correct answer.",
+      "question_type": "MCQ",
+      "marks_per_question": 1,
+      "total_questions": 20,
+      "sub_parts": null
+    },
+    {
+      "id": "B",
+      "title": "Section B — Short Answer",
+      "description": "Answer in 2-3 sentences.",
+      "question_type": "short_answer",
+      "marks_per_question": 2,
+      "total_questions": 10,
+      "sub_parts": ["i", "ii", "iii"]
+    },
+    {
+      "id": "C",
+      "title": "Section C — Long Answer",
+      "description": "Answer in detail.",
+      "question_type": "long_answer",
+      "marks_per_question": 5,
+      "total_questions": 6,
+      "sub_parts": ["a", "b", "c", "d"]
+    }
+  ],
+  "docx_template": null
+}

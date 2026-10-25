@@ -1,0 +1,71 @@
+{
+  "format_id": "chemistry_ut1_class_vii",
+  "display_name": "Word Template — Chemistry Unit Test Class VII",
+  "school_name": "St Vincent Pallotti School",
+  "paper_title": "Unit Test-1",
+  "subject": "Chemistry",
+  "class": "VII",
+  "total_marks": 25.0,
+  "duration": "",
+  "instructions": [],
+  "sections": [
+    {
+      "id": "A",
+      "title": "Section- 1 — Choose the correct answer",
+      "description": "",
+      "question_type": "MCQ",
+      "total_questions": 6,
+      "marks_per_question": 0.5,
+      "sub_parts": null
+    },
+    {
+      "id": "B",
+      "title": "Derive the molecular formula",
+      "description": "",
+      "question_type": "short_answer",
+      "total_questions": 3,
+      "marks_per_question": 1.0,
+      "sub_parts": null
+    },
+    {
+      "id": "C",
+      "title": "Assertion based Question",
+      "description": "",
+      "question_type": "MCQ",
+      "total_questions": 3,
+      "marks_per_question": 1.0,
+      "sub_parts": null
+    },
+    {
+      "id": "D",
+      "title": "Identify the radical and write its symbol with valency",
+      "description": "",
+      "question_type": "short_answer",
+      "total_questions": 3,
+      "marks_per_question": 1.0,
+      "sub_parts": null
+    },
+    {
+      "id": "E",
+      "title": "Case study. Read the information and answer the questions given",
+      "description": "",
+      "question_type": "MCQ",
+      "total_questions": 3,
+      "marks_per_question": 1.0,
+      "sub_parts": null
+    },
+    {
+      "id": "F",
+      "title": "Section -II",
+      "description": "",
+      "question_type": "short_answer",
+      "total_questions": 3,
+      "attempt_count": 2,
+      "start_number": 2,
+      "marks_per_question": 5.0,
+      "sub_parts": null
+    }
+  ],
+  "docx_template": "../templates/chemistry_ut1_class_vii.docx",
+  "template_body_start": 4
+}

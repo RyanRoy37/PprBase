@@ -1,0 +1,341 @@
+# PprBase — AI-Powered Question Paper Builder
+## Claude Code Build Prompt
+
+---
+
+## PROJECT OVERVIEW
+
+Build a cross-platform desktop application called **PprBase** for non-technical users (school teachers) to compose structured question papers without any manual formatting. The app loads a question paper format/template, lets the user fill in questions through a guided UI, and generates a perfectly formatted `.docx` file. It must also support AI-powered question generation from a syllabus using RAG.
+
+The target user is a teacher who:
+- Is not tech-savvy
+- Works with multiple formats (Class 6 Bio, Class 7 Chem, etc.)
+- Needs to add text questions, MCQs, images, and tables
+- Should never have to touch formatting manually
+
+---
+
+## TECH STACK
+
+| Layer | Technology |
+|---|---|
+| Language | Python 3.11+ |
+| UI Framework | PyQt6 |
+| Document Engine | python-docx |
+| Image Handling | Pillow |
+| Vector DB | ChromaDB |
+| Embeddings | sentence-transformers (local, free) |
+| LLM (AI gen) | Ollama with llama3 OR Claude API (user configures) |
+| RAG Orchestration | LangChain |
+| Packaging | PyInstaller |
+| Config/State | JSON files |
+
+---
+
+## REPOSITORY STRUCTURE
+pprbase/
+├── main.py                        # App entry point
+├── requirements.txt
+├── README.md
+├── config/
+│   └── settings.json              # App-wide settings (LLM choice, paths)
+├── formats/
+│   └── README.md                  # Where format JSON files live
+├── syllabi/                       # Raw uploaded syllabus PDFs/text files
+├── vectorstore/                   # ChromaDB persistence directory
+├── output/                        # Generated .docx files saved here
+├── assets/
+│   └── logo.png
+├── core/
+│   ├── init.py
+│   ├── format_loader.py           # Loads and validates format JSON
+│   ├── document_engine.py         # python-docx insertion and formatting logic
+│   ├── image_handler.py           # Image resize, position, and insert
+│   ├── table_builder.py           # Table creation and insertion
+│   └── state_manager.py           # In-memory paper state (all questions)
+├── ai/
+│   ├── init.py
+│   ├── embedder.py                # Syllabus chunking and embedding
+│   ├── vector_store.py            # ChromaDB read/write
+│   ├── rag_pipeline.py            # LangChain RAG chain
+│   └── question_generator.py     # Prompt builder + LLM call + response parser
+└── ui/
+├── init.py
+├── main_window.py             # Root window, tab management
+├── format_selector.py         # Screen 1: choose/load a format
+├── paper_editor.py            # Screen 2: main question entry UI
+├── question_form.py           # Reusable form widget per question
+├── image_picker.py            # Image attach + preview widget
+├── table_dialog.py            # Dialog for defining table dimensions
+├── ai_panel.py                # Right-side AI suggestion panel
+├── syllabus_manager.py        # Screen: upload and manage syllabi
+├── preview_panel.py           # Live preview of paper structure
+└── styles.py                  # Qt stylesheet (warm, clean, teacher-friendly)
+
+---
+
+## FORMAT SPECIFICATION (JSON)
+
+Each question paper format is defined as a JSON file stored in `formats/`. This makes the app extensible — adding a new class/subject just means adding a new JSON file.
+
+### Example: `formats/class7_chemistry.json`
+
+```json
+{
+  "format_id": "class7_chemistry",
+  "display_name": "Class 7 — Chemistry",
+  "school_name": "St. Mary's School",
+  "subject": "Chemistry",
+  "class": "7",
+  "total_marks": 80,
+  "duration": "3 hours",
+  "instructions": [
+    "All questions are compulsory.",
+    "Draw neat diagrams wherever necessary."
+  ],
+  "sections": [
+    {
+      "id": "A",
+      "title": "Section A — Objective Questions",
+      "description": "Choose the correct answer",
+      "question_type": "MCQ",
+      "marks_per_question": 1,
+      "total_questions": 20,
+      "sub_parts": null
+    },
+    {
+      "id": "B",
+      "title": "Section B — Short Answer",
+      "description": "Answer in 2-3 sentences",
+      "question_type": "short_answer",
+      "marks_per_question": 2,
+      "total_questions": 10,
+      "sub_parts": ["i", "ii", "iii"]
+    },
+    {
+      "id": "C",
+      "title": "Section C — Long Answer",
+      "description": "Answer in detail",
+      "question_type": "long_answer",
+      "marks_per_question": 5,
+      "total_questions": 6,
+      "sub_parts": ["a", "b", "c", "d"]
+    }
+  ],
+  "docx_template": "templates/class7_chemistry_template.docx"
+}
+```
+
+---
+
+## PHASE 1 — CORE EDITOR (No AI)
+
+### Goal
+A working desktop app where a teacher can:
+1. Select or load a format (JSON)
+2. Navigate sections and question numbers via a guided UI
+3. Type questions with options (MCQ), marks, and sub-parts
+4. Attach an image (optional) per question
+5. Define a table (optional) per question
+6. Preview the paper structure in a live sidebar
+7. Export a perfectly formatted `.docx`
+
+### What to build
+
+#### `core/format_loader.py`
+- `load_format(path: str) -> dict` — parse and validate a format JSON
+- `list_available_formats(formats_dir: str) -> list[dict]` — scan formats/ dir and return display names + paths
+
+#### `core/state_manager.py`
+- `PaperState` class: holds all entered questions in memory
+- Structure: `{ section_id: { question_num: { text, type, options, marks, image_path, table_def, sub_parts: {...} } } }`
+- `add_question()`, `update_question()`, `delete_question()`, `get_all()` methods
+- `to_json()` and `from_json()` for save/load (so work in progress can be resumed)
+
+#### `core/document_engine.py`
+- `DocumentEngine(format: dict, state: PaperState)` class
+- `build_document() -> Document` — generates complete `.docx` from state
+- Handles: header (school name, subject, class, time, marks), instructions block, section headers, question numbering (1., 2., or (i), (ii) for sub-parts), MCQ options (a) b) c) d) layout), marks in right-aligned brackets like [1], proper paragraph spacing
+- `save(output_path: str)`
+
+#### `core/image_handler.py`
+- `prepare_image(path: str, max_width_cm: float) -> InlineImage` — resize and return docx-ready image
+- Support JPEG, PNG, WEBP
+
+#### `core/table_builder.py`
+- `build_table(doc, rows: int, cols: int, headers: list[str]) -> Table`
+- Insert into correct position in document
+
+#### `ui/main_window.py`
+- PyQt6 `QMainWindow` with a clean top nav
+- Three main views: Format Selector → Paper Editor → Export
+- Persistent left sidebar showing paper structure tree
+
+#### `ui/format_selector.py`
+- Grid of format cards (each card = subject + class, loaded from formats/ dir)
+- "Add New Format" button (opens file dialog to load a JSON)
+- "Create Blank Format" wizard (step-by-step to define sections — advanced, can be Phase 2)
+
+#### `ui/paper_editor.py`
+- Two-pane layout: left = question entry form, right = paper preview tree
+- Section tabs at top (one tab per section from format)
+- Question number selector (dropdown or stepper: Q1, Q2 ... up to total defined in format)
+- Sub-part selector if section has sub_parts defined
+- Calls `question_form.py` for the actual input fields
+
+#### `ui/question_form.py`
+- Reusable widget that adapts based on `question_type`:
+  - MCQ: question text field + 4 option fields + correct answer selector
+  - short/long answer: question text area + marks field
+- "Attach Image" button → opens `image_picker.py`
+- "Add Table" button → opens `table_dialog.py`
+- "Save Question" button → writes to `PaperState`
+
+#### `ui/image_picker.py`
+- File dialog filtered to image types
+- Preview thumbnail
+- Position selector: "Alongside question" or "Below question"
+- Width slider (percentage of page width)
+
+#### `ui/table_dialog.py`
+- Simple dialog: rows input, cols input, optional column headers
+- Preview of table structure before inserting
+
+#### `ui/preview_panel.py`
+- Scrollable tree showing: Section A > Q1 ✓, Q2 ✓, Q3 (empty) ...
+- Click any item to jump to that question in the editor
+- Color: green = filled, grey = empty, orange = has image/table
+
+#### `ui/styles.py`
+- Clean, warm PyQt6 stylesheet
+- Soft off-white background, readable fonts, clear button states
+- Not clinical — this is for a teacher, it should feel approachable
+
+### Export flow
+- "Generate Paper" button at bottom
+- Shows a save dialog for output path
+- Calls `DocumentEngine.build_document().save(path)`
+- Shows success message with "Open File" and "Open Folder" buttons
+
+---
+
+## PHASE 2 — MULTI-FORMAT MANAGEMENT + SAVE/RESUME
+
+### Goal
+Make the app robust for daily use across many formats, with the ability to save work-in-progress.
+
+### What to build
+
+#### Format Management Screen (`ui/format_selector.py` extended)
+- List all formats in `formats/` dir with edit/delete options
+- "Duplicate Format" option (e.g. copy Class 7 Chem to make Class 8 Chem)
+- Format wizard: step-by-step UI to create a new format JSON without editing JSON manually — a form that lets you define sections, question types, marks, sub-parts
+
+#### Save/Resume (`core/state_manager.py` extended)
+- "Save Draft" → saves `PaperState` as JSON to a `drafts/` directory, named by format + timestamp
+- On app launch, show recent drafts as resumable sessions
+- Auto-save every 2 minutes in background
+
+#### Format Validator (`core/format_loader.py` extended)
+- Validate JSON on load: check for required fields, valid question types, sane totals
+- Show human-readable errors if format JSON is malformed
+
+---
+
+## PHASE 3 — AI QUESTION GENERATION (RAG)
+
+### Goal
+Teacher uploads syllabus documents (PDF or text). App indexes them. She can then say "give me 5 MCQs from Chapter 3 on Acids and Bases, medium difficulty" and get questions she can click to insert directly.
+
+### What to build
+
+#### `ai/embedder.py`
+- `chunk_document(path: str) -> list[str]` — read PDF or .txt, split into ~500 token chunks with overlap
+- Use `pypdf2` or `pdfplumber` for PDF text extraction
+- Use `sentence-transformers` model `all-MiniLM-L6-v2` for local embeddings (no API key needed)
+
+#### `ai/vector_store.py`
+- `VectorStore` class wrapping ChromaDB
+- `add_syllabus(subject: str, class_name: str, chunks: list[str])` — stores with metadata tags
+- `query(text: str, subject: str, class_name: str, top_k: int) -> list[str]` — retrieves relevant chunks filtered by subject/class
+- `list_syllabi() -> list[dict]` — lists all indexed syllabus documents
+- `delete_syllabus(id: str)`
+
+#### `ai/question_generator.py`
+- `generate_questions(topic: str, question_type: str, count: int, difficulty: str, context_chunks: list[str]) -> list[dict]`
+- Builds a detailed prompt injecting retrieved context chunks
+- Calls either:
+  - **Ollama** (local): `POST http://localhost:11434/api/generate` with llama3
+  - **Claude API**: `anthropic.Anthropic().messages.create(...)`
+  - Configured via `config/settings.json`
+- Parses structured JSON response into question dicts matching `PaperState` format
+- Prompt must request output in JSON only: `[{ "text": "...", "options": [...], "answer": "...", "marks": 1 }]`
+
+#### `ui/syllabus_manager.py`
+- Screen accessible from nav: "Manage Syllabi"
+- Upload PDFs or text files, tag them with class + subject
+- Shows indexed syllabi as cards with "Re-index" and "Delete" options
+- Progress bar during indexing
+
+#### `ui/ai_panel.py`
+- Collapsible right panel in the Paper Editor (toggle button in top bar)
+- Fields: Topic/Chapter, Question Type, Count (1–10), Difficulty (Easy/Medium/Hard)
+- "Generate" button → calls RAG pipeline → shows results as cards
+- Each card: question text preview + "Insert into Paper" button
+- Inserting fills the current question form with the AI-generated content for review before saving
+
+---
+
+## PHASE 4 — POLISH + PACKAGING
+
+### Goal
+App is ready for a non-technical user to install and use independently.
+
+### What to build
+
+#### Onboarding
+- First-launch wizard: welcome screen, app folder setup, optional Ollama install instructions
+- "Add your first format" flow
+
+#### Settings Screen
+- LLM provider: Ollama (local) vs Claude API (enter API key)
+- Default output folder
+- Auto-save interval
+- Font size (accessibility)
+
+#### Error Handling
+- All file ops wrapped in try/except with friendly dialogs ("Couldn't open that image — is it a JPEG or PNG?")
+- Docx generation errors shown with specific field highlighted
+
+#### PyInstaller Packaging
+- `build.spec` for Windows `.exe` and macOS `.app`
+- Bundle all assets, fonts, and ChromaDB
+- README with one-paragraph install instructions for non-technical users
+
+---
+
+## IMPLEMENTATION NOTES
+
+1. **Always validate format JSON** before allowing the user to proceed — bad formats should show a clear error, not crash
+2. **PaperState is the source of truth** — UI only reads from and writes to state; document engine only reads from state
+3. **Never modify the original template .docx** — always generate fresh from scratch using python-docx
+4. **Image insertion**: use `InlineShape` in python-docx; always resize proportionally; default max width = 8cm
+5. **MCQ formatting**: options must be on separate lines, indented, with consistent letter labels
+6. **Section headers** must match the format JSON exactly — bold, centered, with a top border rule
+7. **Marks** always right-aligned on the same line as the question using a right-aligned tab stop
+8. **AI panel** is non-blocking — generation runs in a `QThread` so the UI never freezes
+9. **ChromaDB** persists to `vectorstore/` directory; create it if it doesn't exist
+10. **All user-facing text** (buttons, labels, errors) should be plain English — no tech jargon
+
+---
+
+## START WITH
+
+Build Phase 1 completely and working before touching Phase 2 or 3. Start with:
+1. `requirements.txt` and project scaffold
+2. `core/format_loader.py` and `core/state_manager.py`
+3. A sample format JSON for Class 7 Chemistry
+4. `core/document_engine.py` — the most critical piece
+5. Then the UI screens in order: format_selector → paper_editor → question_form → export
+
+Test the full Phase 1 flow (load format → enter 3 questions → export .docx) before proceeding.

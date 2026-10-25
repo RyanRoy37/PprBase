@@ -1,0 +1,71 @@
+{
+  "format_id": "chemistry_ut1_class_vi",
+  "display_name": "Word Template — Chemistry Unit Test Class VI",
+  "school_name": "St Vincent Pallotti School",
+  "paper_title": "Unit Test-1",
+  "subject": "Chemistry",
+  "class": "VI",
+  "total_marks": 25.0,
+  "duration": "",
+  "instructions": [],
+  "sections": [
+    {
+      "id": "A",
+      "title": "Section- 1 — Choose the correct answer",
+      "description": "",
+      "question_type": "MCQ",
+      "total_questions": 6,
+      "marks_per_question": 0.5,
+      "sub_parts": null
+    },
+    {
+      "id": "B",
+      "title": "Name the following",
+      "description": "",
+      "question_type": "short_answer",
+      "total_questions": 3,
+      "marks_per_question": 1.0,
+      "sub_parts": null
+    },
+    {
+      "id": "C",
+      "title": "Assertion Based Questions",
+      "description": "",
+      "question_type": "MCQ",
+      "total_questions": 3,
+      "marks_per_question": 1.0,
+      "sub_parts": null
+    },
+    {
+      "id": "D",
+      "title": "Derive the molecular formula",
+      "description": "",
+      "question_type": "short_answer",
+      "total_questions": 3,
+      "marks_per_question": 1.0,
+      "sub_parts": null
+    },
+    {
+      "id": "E",
+      "title": "Case Study )",
+      "description": "",
+      "question_type": "MCQ",
+      "total_questions": 3,
+      "marks_per_question": 1.0,
+      "sub_parts": null
+    },
+    {
+      "id": "F",
+      "title": "Section -II",
+      "description": "",
+      "question_type": "short_answer",
+      "total_questions": 3,
+      "attempt_count": 2,
+      "start_number": 2,
+      "marks_per_question": 5.0,
+      "sub_parts": null
+    }
+  ],
+  "docx_template": "../templates/chemistry_ut1_class_vi.docx",
+  "template_body_start": 4
+}

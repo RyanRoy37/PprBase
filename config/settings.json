@@ -1,0 +1,23 @@
+{
+  "llm_provider": "ollama",
+  "ollama": {
+    "base_url": "http://localhost:11434",
+    "model": "llama3"
+  },
+  "claude": {
+    "api_key": "",
+    "model": "claude-opus-4-8"
+  },
+  "paths": {
+    "formats_dir": "formats",
+    "syllabi_dir": "syllabi",
+    "vectorstore_dir": "vectorstore",
+    "output_dir": "output",
+    "drafts_dir": "drafts"
+  },
+  "editor": {
+    "default_image_max_width_cm": 8.0,
+    "auto_save_minutes": 2,
+    "font_size": 11
+  }
+}

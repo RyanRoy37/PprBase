@@ -1,0 +1,38 @@
+[
+  {
+    "marks": 25,
+    "subject": "Biology",
+    "questions": 12,
+    "paper": "25_mark_biology.docx",
+    "pdf": "25_mark_biology.pdf",
+    "pdf_pages": 2,
+    "answer_key": "25_mark_biology_answers.docx",
+    "embedded_images": 1,
+    "tables": 1,
+    "status": "passed"
+  },
+  {
+    "marks": 50,
+    "subject": "Chemistry",
+    "questions": 24,
+    "paper": "50_mark_chemistry.docx",
+    "pdf": "50_mark_chemistry.pdf",
+    "pdf_pages": 3,
+    "answer_key": "50_mark_chemistry_answers.docx",
+    "embedded_images": 1,
+    "tables": 1,
+    "status": "passed"
+  },
+  {
+    "marks": 100,
+    "subject": "Science",
+    "questions": 48,
+    "paper": "100_mark_science.docx",
+    "pdf": "100_mark_science.pdf",
+    "pdf_pages": 5,
+    "answer_key": "100_mark_science_answers.docx",
+    "embedded_images": 2,
+    "tables": 2,
+    "status": "passed"
+  }
+]
